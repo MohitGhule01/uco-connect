@@ -1,0 +1,271 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Depot Aggregation Bay - UCO-Connect{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-950 via-slate-900 to-brand-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-purple-900/50">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-900/80 text-purple-300 border border-purple-700">
+                    <i class="fa-solid fa-warehouse mr-1"></i> Depot Aggregator Hub
+                </span>
+                <span class="text-xs text-purple-200">Reconciliation Bay</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-white">{{ user.profile.business_name|default:"Metro Central Depot Hub" }}</h1>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+                Receive incoming collector hauls, reconcile weights, create tamper-evident sealed batches, and dispatch certified feedstock to authorized processors.
+            </p>
+        </div>
+
+        <button onclick="openBatchModal()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-purple-950/40 transition-all flex items-center gap-2.5 shrink-0">
+            <i class="fa-solid fa-boxes-stacked text-base"></i>
+            <span>Create Sealed Batch</span>
+        </button>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Incoming Collections</span>
+            <h3 class="text-2xl font-black text-amber-600 mt-2">{{ incoming.count }} <span class="text-xs font-semibold text-slate-500">Awaiting Bay</span></h3>
+            <p class="text-[11px] text-amber-600 font-semibold mt-1">From active collector runs</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Received at Bay</span>
+            <h3 class="text-2xl font-black text-purple-600 mt-2">{{ at_depot.count }} <span class="text-xs font-semibold text-slate-500">Verified</span></h3>
+            <p class="text-[11px] text-purple-600 font-semibold mt-1">Ready for batch aggregation</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Volume in Storage</span>
+            <h3 class="text-2xl font-black text-slate-900 mt-2">{{ total_received }} <span class="text-xs font-semibold text-slate-500">L</span></h3>
+            <p class="text-[11px] text-slate-500 mt-1">Physical inventory</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Batches</span>
+            <h3 class="text-2xl font-black text-emerald-600 mt-2">{{ batches.count }} <span class="text-xs font-semibold text-slate-500">Sealed</span></h3>
+            <p class="text-[11px] text-emerald-600 font-semibold mt-1">Dispatched to processors</p>
+        </div>
+    </div>
+
+    <!-- Section 1: Incoming Collections Awaiting Intake -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-black text-slate-900">Incoming Collector Collections (Awaiting Intake)</h3>
+                <p class="text-xs text-slate-500">Micro-collections picked up by collectors ready to be checked in at depot</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                    <tr>
+                        <th class="py-3 px-4">Tracking Code</th>
+                        <th class="py-3 px-4">Restaurant Source</th>
+                        <th class="py-3 px-4">Collector</th>
+                        <th class="py-3 px-4">Collector Weight</th>
+                        <th class="py-3 px-4">Discrepancy</th>
+                        <th class="py-3 px-4">Timestamp</th>
+                        <th class="py-3 px-4 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    {% for p in incoming %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ p.tracking_code }}</td>
+                            <td class="py-3.5 px-4 font-bold text-slate-800">{{ p.restaurant_name }}</td>
+                            <td class="py-3.5 px-4 text-slate-600">{{ p.collector.get_full_name|default:p.collector.username }}</td>
+                            <td class="py-3.5 px-4 font-black text-emerald-700">
+                                {{ p.verification.verified_weight_liters|default:p.quantity_liters }} L
+                            </td>
+                            <td class="py-3.5 px-4">
+                                {% if p.verification.is_anomaly %}
+                                    <span class="px-2 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold">Anomaly ({{ p.verification.discrepancy_percent }}%)</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold">Verified</span>
+                                {% endif %}
+                            <td class="py-3.5 px-4 text-slate-400">
+                                {% if p.verification and p.verification.verified_at %}
+                                    {{ p.verification.verified_at|timesince }} ago
+                                {% else %}
+                                    {{ p.updated_at|timesince }} ago
+                                {% endif %}
+                            </td>
+                                <a href="{% url 'depot_reconcile_pickup' p.id %}" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-colors shadow-sm inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                    <span>Accept at Depot</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-slate-400">
+                                No incoming collections awaiting intake right now.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 2: Reconciled & Dispatched Batches -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-black text-slate-900">Sealed Processor Batches</h3>
+                <p class="text-xs text-slate-500">Aggregated micro-collections grouped into bulk feedstock batches with tamper-evident seals</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                    <tr>
+                        <th class="py-3 px-4">Batch Code</th>
+                        <th class="py-3 px-4">Security Seal #</th>
+                        <th class="py-3 px-4">Aggregated Volume</th>
+                        <th class="py-3 px-4">Processor</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Created Date</th>
+                        <th class="py-3 px-4 text-right">Dispatch Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    {% for b in batches %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-3.5 px-4 font-mono font-bold text-purple-950">{{ b.batch_code }}</td>
+                            <td class="py-3.5 px-4 font-mono text-slate-500">
+                                <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-semibold">{{ b.seal_number }}</span>
+                            </td>
+                            <td class="py-3.5 px-4 font-black text-slate-900 text-sm">{{ b.expected_quantity_liters }} L</td>
+                            <td class="py-3.5 px-4 text-slate-700 font-semibold">{{ b.processor.profile.business_name|default:b.processor.username|default:"Unassigned" }}</td>
+                            <td class="py-3.5 px-4">
+                                {% if b.status == 'RECONCILED' %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                        Reconciled &bull; Ready to Dispatch
+                                    </span>
+                                {% elif b.status == 'DISPATCHED' %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Dispatched in Transit
+                                    </span>
+                                {% elif b.status == 'PROCESSED' %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        Converted to Biodiesel
+                                    </span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+                                        {{ b.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">{{ b.created_at|date:"d M Y, H:i" }}</td>
+                            <td class="py-3.5 px-4 text-right">
+                                {% if b.status == 'RECONCILED' %}
+                                    <a href="{% url 'depot_dispatch_batch' b.id %}" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-sm inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                                        <span>Dispatch to Processor</span>
+                                    </a>
+                                {% else %}
+                                    <span class="text-slate-400 italic text-[11px]">Dispatched</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-slate-400">
+                                No sealed batches created yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Create Sealed Batch -->
+<div id="batchModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
+        <div class="bg-gradient-to-r from-purple-950 to-indigo-900 text-white p-6 flex items-center justify-between">
+            <div>
+                <h3 class="font-black text-xl text-white">Create Sealed Processor Batch</h3>
+                <p class="text-xs text-purple-200 mt-0.5">Aggregate verified micro-collections into bulk refinery feedstock</p>
+            </div>
+            <button onclick="closeBatchModal()" class="text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{% url 'depot_create_batch' %}" method="POST" class="p-6 space-y-4 text-xs">
+            {% csrf_token %}
+
+            <div>
+                <label class="block font-bold text-slate-700 uppercase mb-2">Select Collections in Storage to Include</label>
+                <div class="max-h-48 overflow-y-auto space-y-2 border border-slate-200 rounded-2xl p-3 bg-slate-50">
+                    {% for p in at_depot %}
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-purple-500 cursor-pointer transition-colors">
+                            <div class="flex items-center gap-2.5">
+                                <input type="checkbox" name="pickup_ids" value="{{ p.id }}" checked class="rounded border-slate-300 text-purple-600 focus:ring-purple-500">
+                                <div>
+                                    <p class="font-bold text-slate-900">{{ p.restaurant_name }}</p>
+                                    <p class="text-[10px] text-slate-400 font-mono">{{ p.tracking_code }} &bull; {{ p.pickup_date }}</p>
+                                </div>
+                            </div>
+                            <span class="font-black text-slate-900">{{ p.quantity_liters }} L</span>
+                        </label>
+                    {% empty %}
+                        <p class="text-slate-400 text-center py-4">No collections currently marked "At Depot". Accept incoming hauls first.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Security Seal Number</label>
+                    <input type="text" name="seal_number" placeholder="e.g. SEAL-RUCO-998822" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs focus:ring-2 focus:ring-purple-500 font-bold text-slate-800">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Target Biofuel Processor</label>
+                    <select name="processor_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 font-medium text-slate-800">
+                        {% for pr in processors %}
+                            <option value="{{ pr.id }}">{{ pr.profile.business_name|default:pr.username }}</option>
+                        {% empty %}
+                            <option value="">Authorized Processor</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1">Depot Quality &amp; Storage Notes</label>
+                <input type="text" name="notes" placeholder="e.g. Moisture &lt; 1.0%, particulate filtered, settled 24h." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-purple-500 font-medium text-slate-800">
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+                <button type="button" onclick="closeBatchModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md transition-all">
+                    Reconcile &amp; Seal Batch
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openBatchModal() {
+        document.getElementById('batchModal').classList.remove('hidden');
+    }
+    function closeBatchModal() {
+        document.getElementById('batchModal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UCO-Connect | Smart Micro-Collection Network{% endblock %}</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        amber: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet.js for Maps (100% Free OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- MapLibre GL -->
+<link rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css">
+
+<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+
+<!-- Leaflet + MapLibre adapter -->
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
+
+
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass-header {
+            background: rgba(6, 78, 59, 0.95);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="glass-header text-white sticky top-0 z-50 border-b border-brand-800 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3">
+                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'landing' %}{% endif %}" class="flex items-center gap-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-400 to-emerald-300 flex items-center justify-center text-brand-950 shadow-inner group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-leaf text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-extrabold text-xl tracking-tight text-white">UCO<span class="text-brand-300 font-light">-Connect</span></span>
+                                <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-800/80 text-brand-200 border border-brand-700">SIH 2026</span>
+                            </div>
+                            <p class="text-[10px] text-brand-200 tracking-wide -mt-0.5 font-medium">UCO &rarr; Biodiesel Hyperlocal Network</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Navigation Links & User Profile -->
+                <div class="hidden md:flex items-center gap-6">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-gauge-high text-xs text-brand-300"></i> Dashboard
+                        </a>
+
+                        {% if user.profile.role == 'GENERATOR' or not user.profile %}
+                            <a href="{% url 'generator_pickups' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                My Pickups
+                            </a>
+                            <a href="{% url 'generator_payments' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Payouts
+                            </a>
+                        {% elif user.profile.role == 'COLLECTOR' %}
+                            <a href="{% url 'collector_route' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Active Route Map
+                            </a>
+                        {% elif user.profile.role == 'DEPOT' %}
+                            <a href="{% url 'depot_dashboard' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Batch Reconciliation
+                            </a>
+                        {% elif user.profile.role == 'PROCESSOR' %}
+                            <a href="{% url 'processor_dashboard' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Biodiesel Processing
+                            </a>
+                        {% elif user.profile.role == 'ADMIN' or user.is_staff %}
+                            <a href="{% url 'admin_control_tower' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Control Tower
+                            </a>
+                            <a href="{% url 'admin_audit_trail' %}" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Audit Trail
+                            </a>
+                            <a href="/admin/" target="_blank" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                                Django Admin
+                            </a>
+                        {% endif %}
+
+                        <!-- Notifications Bell -->
+                        <div class="relative" id="notificationDropdownContainer">
+                            <button onclick="toggleNotifications()" class="p-2 text-brand-200 hover:text-white rounded-lg hover:bg-brand-800/50 transition-colors relative">
+                                <i class="fa-regular fa-bell text-base"></i>
+                                {% if user.notifications.count > 0 %}
+                                    <span class="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full ring-2 ring-brand-900"></span>
+                                {% endif %}
+                            </button>
+                            <div id="notificationMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-slate-150 py-2 z-50 text-slate-800">
+                                <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                                    <span class="font-bold text-xs uppercase tracking-wider text-slate-500">Notifications</span>
+                                    <span class="text-xs text-brand-700 font-semibold">{{ user.notifications.count }} total</span>
+                                </div>
+                                <div class="max-h-64 overflow-y-auto divide-y divide-slate-50">
+                                    {% for notif in user.notifications.all|slice:":5" %}
+                                        <a href="{% if notif.link %}{% url 'mark_notification_read' notif.id %}{% else %}#{% endif %}" class="block px-4 py-2.5 hover:bg-slate-50 transition-colors {% if not notif.is_read %}bg-brand-50/50{% endif %}">
+                                            <p class="text-xs font-bold text-slate-800">{{ notif.title }}</p>
+                                            <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ notif.message }}</p>
+                                            <span class="text-[10px] text-slate-400 mt-1 block">{{ notif.created_at|timesince }} ago</span>
+                                        </a>
+                                    {% empty %}
+                                        <div class="px-4 py-6 text-center text-xs text-slate-400">
+                                            No new notifications
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Profile Pill -->
+                        <div class="flex items-center gap-3 pl-3 border-l border-brand-800">
+                            <div class="text-right">
+                                <p class="text-xs font-bold text-white leading-tight">{{ user.get_full_name|default:user.username }}</p>
+                                <span class="inline-block text-[10px] font-semibold px-2 py-0.2 rounded-full bg-brand-800 text-brand-300 border border-brand-700">
+                                    {{ user.profile.get_role_display|default:"Generator" }}
+                                </span>
+                            </div>
+                            <a href="{% url 'logout' %}" title="Log Out" class="p-2 text-brand-200 hover:text-red-300 hover:bg-brand-800/60 rounded-lg transition-colors">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'landing' %}#how-it-works" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                            How It Works
+                        </a>
+                        <a href="{% url 'landing' %}#impact" class="text-sm font-semibold text-brand-100 hover:text-white transition-colors">
+                            RUCO & Impact
+                        </a>
+                        <a href="{% url 'login' %}" class="text-sm font-semibold text-white px-4 py-2 rounded-lg bg-brand-800/80 hover:bg-brand-800 border border-brand-700 transition-all">
+                            Log In
+                        </a>
+                        <a href="{% url 'register' %}" class="text-sm font-bold text-brand-950 px-4 py-2 rounded-lg bg-emerald-400 hover:bg-emerald-300 shadow-sm transition-all">
+                            Join Network
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="flex md:hidden items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="p-2 text-brand-200 hover:text-white">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </a>
+                    {% endif %}
+                    <button type="button" onclick="toggleMobileMenu()" class="p-2 rounded-lg text-brand-200 hover:text-white hover:bg-brand-800 focus:outline-none">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobileMenu" class="hidden md:hidden bg-brand-950 border-t border-brand-800 px-4 pt-3 pb-4 space-y-2">
+            {% if user.is_authenticated %}
+                <div class="pb-2 border-b border-brand-800">
+                    <p class="text-xs text-brand-300 font-semibold">{{ user.username }}</p>
+                    <span class="text-[11px] text-white font-bold">{{ user.profile.get_role_display|default:"Generator" }}</span>
+                </div>
+                <a href="{% url 'dashboard' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Dashboard</a>
+                {% if user.profile.role == 'GENERATOR' or not user.profile %}
+                    <a href="{% url 'generator_pickups' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">My Pickups</a>
+                    <a href="{% url 'generator_payments' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Payouts</a>
+                {% elif user.profile.role == 'COLLECTOR' %}
+                    <a href="{% url 'collector_route' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Active Route</a>
+                {% elif user.profile.role == 'DEPOT' %}
+                    <a href="{% url 'depot_dashboard' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Batch Reconciliation</a>
+                {% elif user.profile.role == 'PROCESSOR' %}
+                    <a href="{% url 'processor_dashboard' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Biodiesel Processing</a>
+                {% elif user.profile.role == 'ADMIN' or user.is_staff %}
+                    <a href="{% url 'admin_control_tower' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Control Tower</a>
+                {% endif %}
+                <a href="{% url 'logout' %}" class="block py-2 text-sm font-semibold text-red-300 hover:text-red-200">Log Out</a>
+            {% else %}
+                <a href="{% url 'landing' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Home</a>
+                <a href="{% url 'login' %}" class="block py-2 text-sm font-semibold text-brand-100 hover:text-white">Log In</a>
+                <a href="{% url 'register' %}" class="block py-2 text-sm font-bold text-emerald-400">Join Network</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Flash Messages (Toasts) -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+            {% for message in messages %}
+                <div class="rounded-xl p-4 mb-3 flex items-start justify-between shadow-sm border {% if message.tags == 'error' %}bg-red-50 text-red-800 border-red-200{% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border-amber-200{% elif message.tags == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200{% else %}bg-blue-50 text-blue-800 border-blue-200{% endif %}">
+                    <div class="flex items-center gap-3">
+                        <i class="{% if message.tags == 'error' %}fa-solid fa-circle-exclamation text-red-600{% elif message.tags == 'warning' %}fa-solid fa-triangle-exclamation text-amber-600{% elif message.tags == 'success' %}fa-solid fa-circle-check text-emerald-600{% else %}fa-solid fa-circle-info text-blue-600{% endif %} text-base"></i>
+                        <span class="text-sm font-medium">{{ message }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 ml-3">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content Body -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Professional Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-sm border-t border-slate-800 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold">
+                            <i class="fa-solid fa-leaf text-sm"></i>
+                        </div>
+                        <span class="font-bold text-white text-base">UCO-Connect</span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Hyperlocal micro-collection, algorithmic routing, and verified digital chain-of-custody transforming waste cooking oil into certified biodiesel.
+                    </p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-[11px] text-emerald-400 font-semibold">Uco-Connected</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">Workflow Links</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="{% url 'landing' %}#how-it-works" class="hover:text-brand-300 transition-colors">Micro-Collection Flow</a></li>
+                        <li><a href="{% url 'landing' %}#pilot-model" class="hover:text-brand-300 transition-colors">50 Generator Pilot Model</a></li>
+                        <li><a href="{% url 'landing' %}#verification-gate" class="hover:text-brand-300 transition-colors">5-Step Verification Gate</a></li>
+                        <li><a href="{% url 'landing' %}#ruco" class="hover:text-brand-300 transition-colors">FSSAI RUCO Compliance</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">Platform Roles</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="{% url 'login' %}" class="hover:text-brand-300 transition-colors">UCO Generator Portal</a></li>
+                        <li><a href="{% url 'login' %}" class="hover:text-brand-300 transition-colors">Micro-Collector App</a></li>
+                        <li><a href="{% url 'login' %}" class="hover:text-brand-300 transition-colors">Depot Aggregator Bay</a></li>
+                        <li><a href="{% url 'login' %}" class="hover:text-brand-300 transition-colors">Authorized Bio-Refinery</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">Policy Alignment</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                        Designed for FSSAI RUCO Initiative & National Policy on Biofuels 5% blending mandate by 2030.
+                    </p>
+                    <div class="p-2.5 rounded-lg bg-slate-800/80 border border-slate-700 text-[11px] text-slate-300">
+                        <i class="fa-solid fa-shield-halved text-brand-400 mr-1"></i> Tamper-evident signed records with QR, GPS, scale weights & photos.
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500">
+                <p>&copy; 2026 UCO-Connect Platform. Developed for Smart India Hackathon (SIH 2026).</p>
+                <p class="mt-2 md:mt-0 flex items-center gap-4">
+                    <span>Clean Energy &bull; Food Safety &bull; Circular Economy</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Scripts -->
+    <script>
+        function toggleNotifications() {
+            const menu = document.getElementById('notificationMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const container = document.getElementById('notificationDropdownContainer');
+            const menu = document.getElementById('notificationMenu');
+            if (container && menu && !container.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

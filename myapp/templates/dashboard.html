@@ -1,580 +1,1253 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCO Connect - Smart Collection Control Tower | SIH 2026</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        emerald: { 800: '#065F46', 900: '#064E3B', 950: '#022C22' },
-                        amber: { 500: '#F59E0B', 600: '#D97706' }
-                    }
-                }
-            }
-        }
-    </script>
+{% extends 'myapp/base.html' %}
 
-    <!-- Alpine.js for interactive state -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% block title %}Generator Dashboard - UCO-Connect{% endblock %}
 
-    <!-- Leaflet.js for Maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% block content %}
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    <!-- Chart.js for Yield Predictor -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- TOP BANNER -->
+    <div class="bg-gradient-to-r from-brand-950 via-brand-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-brand-800">
 
-    <style>
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(229, 231, 235, 0.8);
-        }
-    </style>
-</head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col"
-      x-data="appData({{ mock_data }})"
-      x-init="initApp()">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
 
-    <!-- TOP BAR METRICS HEADER -->
-    <header class="bg-emerald-950 text-white border-b border-emerald-800 shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-amber-500 text-slate-950 rounded-lg font-black text-xl">UCO</div>
-                <div>
-                    <h1 class="font-bold text-lg leading-none text-emerald-400">UCO Connect</h1>
-                    <p class="text-xs text-slate-400">Smart Collection Control Tower | <span class="text-amber-400 font-medium">PS ID: 26200 (COGNEXA)</span></p>
-                </div>
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+                    <i class="fa-solid fa-utensils mr-1"></i>
+                    FBO Generator Portal
+                </span>
+
+                <span class="text-xs text-brand-200">
+                    FSSAI RUCO Verified
+                </span>
+
             </div>
 
-            <!-- Global Impact Metrics Bar -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-xs">
-                <div class="bg-emerald-900/80 border border-emerald-700/50 rounded-lg p-2 px-3">
-                    <span class="text-slate-300 block">Total UCO Collected</span>
-                    <span class="text-base font-extrabold text-amber-400">{{ top_metrics.total_uco_collected_liters|floatformat:0 }} L</span>
-                </div>
-                <div class="bg-emerald-900/80 border border-emerald-700/50 rounded-lg p-2 px-3">
-                    <span class="text-slate-300 block">Biodiesel Feedstock</span>
-                    <span class="text-base font-extrabold text-emerald-300">{{ top_metrics.biodiesel_produced_liters|floatformat:0 }} L</span>
-                </div>
-                <div class="bg-emerald-900/80 border border-emerald-700/50 rounded-lg p-2 px-3">
-                    <span class="text-slate-300 block">CO2 Saved</span>
-                    <span class="text-base font-extrabold text-green-400">{{ top_metrics.co2_emissions_saved_kg|floatformat:0 }} kg</span>
-                </div>
-                <div class="bg-emerald-900/80 border border-emerald-700/50 rounded-lg p-2 px-3">
-                    <span class="text-slate-300 block">Fraud Prevention</span>
-                    <span class="text-base font-extrabold text-blue-400">{{ top_metrics.fraud_prevention_rate_pct }}%</span>
-                </div>
-            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-white">
+                Welcome, {{ user.profile.business_name|default:user.username }}
+            </h1>
+
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+                Track your cooking oil disposal, get guaranteed &amp; instant ₹50/L UPI payouts,
+                and download digital compliance disposal certificates.
+            </p>
         </div>
 
-        <!-- ROLE NAVIGATION TABS -->
-        <div class="bg-emerald-900 px-4 border-t border-emerald-800">
-            <div class="max-w-7xl mx-auto flex space-x-1 overflow-x-auto text-sm font-medium py-2">
-                <button @click="activeTab = 'generator'" 
-                        :class="activeTab === 'generator' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-200 hover:bg-emerald-800'"
-                        class="px-4 py-2 rounded-md transition flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="store" class="w-4 h-4"></i> Generator Dashboard
-                </button>
-                <button @click="activeTab = 'control_tower'; $nextTick(() => renderMap());" 
-                        :class="activeTab === 'control_tower' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-200 hover:bg-emerald-800'"
-                        class="px-4 py-2 rounded-md transition flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="radar" class="w-4 h-4"></i> Control Tower (Admin)
-                </button>
-                <button @click="activeTab = 'collector'" 
-                        :class="activeTab === 'collector' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-200 hover:bg-emerald-800'"
-                        class="px-4 py-2 rounded-md transition flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="truck" class="w-4 h-4"></i> Collector Module
-                </button>
-                <button @click="activeTab = 'depot'" 
-                        :class="activeTab === 'depot' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-200 hover:bg-emerald-800'"
-                        class="px-4 py-2 rounded-md transition flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="factory" class="w-4 h-4"></i> Depot & Processor
-                </button>
-            </div>
-        </div>
-    </header>
+        <button
+            onclick="openPickupModal()"
+            class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-brand-500 hover:from-emerald-400 hover:to-brand-400 text-brand-950 font-black text-sm shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2.5 shrink-0">
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+            <i class="fa-solid fa-plus-circle text-base"></i>
 
-        <!-- ========================================== -->
-        <!-- A. GENERATOR DASHBOARD -->
-        <!-- ========================================== -->
-        <div x-show="activeTab === 'generator'" x-transition class="space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Pickup Request Form -->
-                <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200 lg:col-span-1">
-                    <div class="flex items-center gap-2 mb-4 text-emerald-900 font-bold text-lg border-b pb-2">
-                        <i data-lucide="plus-circle" class="w-5 h-5 text-amber-500"></i> Request UCO Pickup
-                    </div>
-                    <form @submit.prevent="submitPickupRequest()" class="space-y-4">
-                        {% csrf_token %}
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">ESTIMATED VOLUME (LITERS)</label>
-                            <input type="number" step="0.1" min="1" x-model="form.volume" required placeholder="e.g. 5.5" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-600 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">OIL QUALITY / GRADE</label>
-                            <select x-model="form.grade" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-600 outline-none bg-white">
-                                <option value="Grade A">Grade A (Low Free Fatty Acid <2%)</option>
-                                <option value="Grade B">Grade B (Medium FFA 2-5%)</option>
-                                <option value="Grade C">Grade C (High Impurities/Dark)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">PREFERRED PICKUP TIME</label>
-                            <input type="datetime-local" x-model="form.pickup_time" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-600 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">LOCATION GPS</label>
-                            <div class="flex gap-2">
-                                <input type="text" x-model="form.gps" readonly class="w-full px-3 py-2 border bg-slate-50 text-slate-500 rounded-lg text-xs">
-                                <button type="button" @click="getGPS()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-semibold">Detect</button>
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
-                            <i data-lucide="send" class="w-4 h-4"></i> Dispatch Pickup Request
-                        </button>
-                    </form>
+            <span>Schedule UCO Pickup</span>
+
+        </button>
+
+    </div>
+
+
+    <!-- STAT CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+        <!-- Total Diverted -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Total Diverted
+                </span>
+
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i class="fa-solid fa-oil-can"></i>
                 </div>
 
-                <!-- Yield Predictor Widget -->
-                <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200 lg:col-span-2 flex flex-col">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <div class="flex items-center gap-2 text-emerald-900 font-bold text-lg">
-                            <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i> AI Yield Predictor Engine
-                        </div>
-                        <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-300">
-                            Est. Next Week: <strong x-text="data.next_week_predicted_yield"></strong>
-                        </span>
-                    </div>
-                    <p class="text-xs text-slate-500 mb-4">Machine Learning model estimation based on historical cooking oil consumption cycles and seasonal restaurant traffic.</p>
-                    <div class="flex-grow min-h-[220px] relative">
-                        <canvas id="yieldChart"></canvas>
-                    </div>
-                </div>
             </div>
 
-            <!-- Instant Payouts & FSSAI Certificates -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200 flex items-center gap-4 bg-gradient-to-br from-emerald-900 to-emerald-950 text-white">
-                    <div class="p-3 bg-amber-500 text-slate-950 rounded-full">
-                        <i data-lucide="wallet" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <div class="text-xs text-slate-300">Total Earnings (UPI Direct)</div>
-                        <div class="text-2xl font-black text-amber-400">₹ 14,850.00</div>
-                        <div class="text-[10px] text-emerald-300">Instant Wallet Payouts Enabled</div>
-                    </div>
-                </div>
+            <h3 class="text-2xl font-black text-slate-900 mt-2">
+                {{ total_liters }}
+                <span class="text-sm font-semibold text-slate-500">
+                    Liters
+                </span>
+            </h3>
 
-                <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-emerald-100 text-emerald-800 rounded-lg">
-                            <i data-lucide="award" class="w-8 h-8"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">FSSAI RUCO Compliance Digital Certificate</h4>
-                            <p class="text-xs text-slate-500">Official certificate verifying 100% compliant disposal of UCO into Bio-diesel stream.</p>
-                        </div>
-                    </div>
-                    <button @click="alert('Downloading FSSAI Digital Disposal Certificate #RUCO-2026-8819')" class="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2">
-                        <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
-                    </button>
-                </div>
-            </div>
+            <p class="text-[11px] text-emerald-600 font-semibold mt-1">
+                Diverted from food re-frying
+            </p>
+
         </div>
 
-        <!-- ========================================== -->
-        <!-- B. CONTROL TOWER (ADMIN DASHBOARD) -->
-        <!-- ========================================== -->
-        <div x-show="activeTab === 'control_tower'" x-transition class="space-y-6">
-            
-            <!-- Map & Geo-Clustering Panel -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass-card rounded-xl p-4 shadow-sm border border-slate-200 lg:col-span-2 flex flex-col">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="map-pin" class="text-emerald-700"></i> Geo-Clustering & Fleet Tracking Map
-                        </h3>
-                        <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">5-10 Pickups / Route Radius</span>
-                    </div>
-                    <div id="controlTowerMap" class="h-80 w-full rounded-lg border"></div>
+
+        <!-- Earnings -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Instant Earnings
+                </span>
+
+                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
                 </div>
 
-                <!-- Active Clustered Routes -->
-                <div class="glass-card rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-900 border-b pb-2 mb-3 flex items-center gap-2">
-                            <i data-lucide="layers" class="text-amber-500"></i> Active Smart Clusters
-                        </h3>
-                        <template x-for="cluster in data.clusters" :key="cluster.id">
-                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                                <div class="flex justify-between items-start">
-                                    <span class="font-bold text-xs text-emerald-900" x-text="cluster.name"></span>
-                                    <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold" x-text="cluster.id"></span>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                                    <div>Pickups: <strong class="text-slate-900" x-text="cluster.pickups_count"></strong></div>
-                                    <div>Volume: <strong class="text-slate-900" x-text="cluster.total_est_volume"></strong></div>
-                                    <div>Radius: <strong class="text-slate-900" x-text="cluster.radius"></strong></div>
-                                    <div>Fuel Saved: <strong class="text-emerald-700" x-text="cluster.est_fuel_saved"></strong></div>
-                                </div>
-                                <div class="text-xs text-slate-500 pt-1 border-t">Assigned Driver: <span class="font-semibold text-slate-800" x-text="cluster.driver"></span></div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-xs text-emerald-900 flex justify-between items-center">
-                        <div>
-                            <span class="block font-bold">Optimization Engine Active</span>
-                            <span class="text-[10px] text-emerald-700">Distance Reduction: 34.2%</span>
-                        </div>
-                        <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
-                    </div>
-                </div>
             </div>
 
-            <!-- Real-Time Exception Engine Table -->
-            <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                        <i data-lucide="alert-triangle" class="text-red-500"></i> Real-Time Exception Engine (Flagged Anomalies)
+            <h3 class="text-2xl font-black text-slate-900 mt-2">
+                ₹{{ total_earnings }}
+            </h3>
+
+            <p class="text-[11px] text-slate-500 font-medium mt-1">
+                Direct settlement @ ₹50/L
+            </p>
+
+        </div>
+
+
+        <!-- Pending -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Pending Pickups
+                </span>
+
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+
+            </div>
+
+            <h3 class="text-2xl font-black text-slate-900 mt-2">
+                {{ pending_count }}
+            </h3>
+
+            <p class="text-[11px] text-blue-600 font-semibold mt-1">
+                Clustered in micro-routes
+            </p>
+
+        </div>
+
+
+        <!-- Certificates -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    RUCO Certificates
+                </span>
+
+                <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+
+            </div>
+
+            <h3 class="text-2xl font-black text-slate-900 mt-2">
+                {{ certificates_count }}
+            </h3>
+
+            <p class="text-[11px] text-purple-600 font-semibold mt-1">
+                Audit-ready compliance
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- LIVE MAP -->
+    <!-- ========================================================= -->
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+
+            <div>
+
+                <div class="flex items-center gap-2">
+
+                    <span class="relative flex h-2.5 w-2.5">
+
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+
+                    </span>
+
+                    <h3 class="text-lg font-black text-slate-900">
+                        Live Collection Vehicle Tracking
                     </h3>
-                    <span class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full" x-text="data.active_exceptions_count + ' Active Flags'"></span>
+
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left text-slate-600">
-                        <thead class="bg-slate-100 text-slate-700 uppercase text-[10px] font-bold">
-                            <tr>
-                                <th class="p-3">Exception ID</th>
-                                <th class="p-3">Generator</th>
-                                <th class="p-3">Collector</th>
-                                <th class="p-3">Anomaly Type</th>
-                                <th class="p-3">Logged / Scale</th>
-                                <th class="p-3">Variance</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <template x-for="ex in data.exceptions" :key="ex.id">
-                                <tr class="hover:bg-slate-50">
-                                    <td class="p-3 font-bold text-slate-900" x-text="ex.id"></td>
-                                    <td class="p-3" x-text="ex.generator"></td>
-                                    <td class="p-3" x-text="ex.collector"></td>
-                                    <td class="p-3 font-semibold text-red-600" x-text="ex.type"></td>
-                                    <td class="p-3" x-text="ex.logged + ' / ' + ex.scale"></td>
-                                    <td class="p-3 font-bold text-red-500" x-text="ex.variance"></td>
-                                    <td class="p-3">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold" 
-                                              :class="ex.status === 'FLAGGED' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'" 
-                                              x-text="ex.status"></span>
-                                    </td>
-                                    <td class="p-3 text-right">
-                                        <button @click="alert('Initiating Verification Audit for ' + ex.id)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded font-bold">Audit</button>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
+
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Real-time GPS tracking of EV collection truck &amp; assigned cluster route
+                </p>
+
             </div>
+
+
+            <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-500 text-white shadow-sm flex items-center gap-1.5">
+
+                    <i class="fa-solid fa-truck-fast"></i>
+
+                    Truck Status: En Route
+
+                </span>
+
+                <span class="px-2.5 py-1 text-slate-500">
+                    ETA: ~12 Mins
+                </span>
+
+            </div>
+
         </div>
 
-        <!-- ========================================== -->
-        <!-- C. COLLECTOR APP MODULE (MOBILE VIEW SIMULATOR) -->
-        <!-- ========================================== -->
-        <div x-show="activeTab === 'collector'" x-transition class="flex justify-center">
-            <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border-8 border-slate-800 overflow-hidden flex flex-col min-h-[620px]">
-                
-                <!-- Mobile Header -->
-                <div class="bg-emerald-900 text-white p-4 flex justify-between items-center">
-                    <div>
-                        <div class="text-xs text-amber-400 font-bold">DRIVER APP MODULE</div>
-                        <div class="font-bold text-base">Rajesh Kumar (TR-01)</div>
-                    </div>
-                    <span class="bg-emerald-800 text-emerald-200 text-[10px] px-2 py-1 rounded-full border border-emerald-600">Online</span>
-                </div>
 
-                <!-- Assigned Route List -->
-                <div class="p-4 flex-grow space-y-3 bg-slate-50">
-                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
-                        <span>Assigned Route Sequence</span>
-                        <span class="text-emerald-700">Cluster CL-NORTH-01</span>
-                    </div>
+        <!-- MAP -->
+        <div class="relative w-full rounded-2xl overflow-hidden border border-slate-200 z-0">
 
-                    <template x-for="(pickup, idx) in data.clusters[0].pickups" :key="idx">
-                        <div class="p-3 bg-white rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-5 h-5 bg-emerald-100 text-emerald-900 rounded-full font-bold text-[10px] flex items-center justify-center" x-text="idx + 1"></span>
-                                    <span class="font-bold text-sm text-slate-900" x-text="pickup.name"></span>
-                                </div>
-                                <div class="text-xs text-slate-500 mt-0.5">Est. Volume: <strong class="text-slate-800" x-text="pickup.liters + ' L'"></strong></div>
-                            </div>
-                            <button @click="openProofModal(pickup)" 
-                                    :class="pickup.status === 'Completed' ? 'bg-slate-200 text-slate-600' : 'bg-amber-500 text-slate-950 font-bold hover:bg-amber-600'"
-                                    class="px-3 py-1.5 rounded-lg text-xs shadow transition flex items-center gap-1">
-                                <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
-                                <span x-text="pickup.status === 'Completed' ? 'Verified' : 'Verify'"></span>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Footer Action -->
-                <div class="p-3 bg-white border-t text-center text-xs text-slate-500">
-                    Digital Scale IoT Link: <span class="font-bold text-emerald-600">Connected (Bluetooth v5.2)</span>
-                </div>
+            <div
+                id="generatorLiveMap"
+                class="w-full h-80 sm:h-96 bg-slate-100"
+                style="min-height:320px;">
             </div>
+
+
+            <!-- LEGEND -->
+            <div class="absolute bottom-3 left-3 z-[400] bg-white/95 backdrop-blur-md p-3 rounded-xl border border-slate-200 shadow-md text-[11px] space-y-1.5">
+
+                <div class="font-bold text-slate-800 uppercase tracking-wider text-[9px]">
+                    Map Legend
+                </div>
+
+                <div class="flex items-center gap-2 text-slate-700">
+
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block border border-white"></span>
+
+                    <span>Your Kitchen Location</span>
+
+                </div>
+
+                <div class="flex items-center gap-2 text-slate-700">
+
+                    <span class="w-3 h-3 rounded-full bg-indigo-600 inline-block border border-white"></span>
+
+                    <span>Live EV Collector Truck</span>
+
+                </div>
+
+                <div class="flex items-center gap-2 text-slate-700">
+
+                    <span class="w-3 h-3 rounded-full bg-purple-600 inline-block border border-white"></span>
+
+                    <span>Regional UCO Depot Hub</span>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <!-- DIGITAL PROOF VERIFICATION MODAL (COLLECTOR) -->
-        <div x-show="showProofModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" x-transition>
-            <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl border">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h4 class="font-bold text-slate-900 flex items-center gap-2">
-                        <i data-lucide="shield-check" class="text-emerald-600"></i> Chain-of-Custody Proof
-                    </h4>
-                    <button @click="showProofModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-                </div>
+    </div>
 
-                <div class="space-y-3">
-                    <!-- QR Scanner Simulation -->
-                    <div class="p-3 bg-slate-900 text-slate-200 rounded-xl text-center space-y-1">
-                        <i data-lucide="scan" class="w-8 h-8 text-amber-400 mx-auto animate-pulse"></i>
-                        <div class="text-xs font-mono text-emerald-400">QR Code Scanned & Validated</div>
-                        <div class="text-[10px] text-slate-400" x-text="'Container ID: UCO-CONT-' + Math.floor(1000 + Math.random() * 9000)"></div>
-                    </div>
 
-                    <!-- GPS Auto Check -->
-                    <div class="p-2 bg-emerald-50 rounded-lg text-xs border border-emerald-200 text-emerald-800 flex justify-between items-center">
-                        <span>GPS Geofence Verification</span>
-                        <span class="font-bold text-emerald-700">MATCHED (&lt; 5m)</span>
-                    </div>
+    <!-- ========================================================= -->
+    <!-- PICKUP REQUESTS -->
+    <!-- ========================================================= -->
 
-                    <!-- Digital Scale Input -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">DIGITAL SCALE WEIGHT (LITERS)</label>
-                        <input type="number" x-model="modalData.scaleWeight" class="w-full px-3 py-2 border rounded-lg font-bold text-slate-900 focus:ring-2 focus:ring-emerald-600 outline-none">
-                    </div>
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
 
-                    <!-- Photo Upload Dropzone Simulation -->
-                    <div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 cursor-pointer">
-                        <i data-lucide="camera" class="w-5 h-5 text-slate-400 mx-auto"></i>
-                        <span class="text-[11px] text-slate-500 block">Photo Evidence Captured (Container & Scale)</span>
-                    </div>
-                </div>
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
 
-                <button @click="completeVerification()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-2.5 rounded-lg shadow transition">
-                    Generate Digital Receipt & Sign
-                </button>
-            </div>
-        </div>
+            <div>
 
-        <!-- ========================================== -->
-        <!-- D. DEPOT & PROCESSOR DASHBOARD -->
-        <!-- ========================================== -->
-        <div x-show="activeTab === 'depot'" x-transition class="space-y-6">
-            
-            <!-- Chain of Custody Pipeline Visualizer -->
-            <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200">
-                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <i data-lucide="git-merge" class="text-amber-500"></i> Closed-Loop Chain of Custody Verification Pipeline
+                <h3 class="text-lg font-black text-slate-900">
+                    Your Cooking Oil Pickup Requests
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
-                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl relative">
-                        <div class="text-[10px] font-bold text-emerald-800 uppercase">Stage 1</div>
-                        <div class="font-bold text-slate-900 text-sm">Generator Request</div>
-                        <div class="text-xs text-slate-500 mt-1">Digital Log & Location Verification</div>
-                        <span class="mt-2 inline-block px-2 py-0.5 bg-emerald-200 text-emerald-900 text-[10px] font-bold rounded">100% Verified</span>
-                    </div>
+                <p class="text-xs text-slate-500">
+                    Live lifecycle tracking with digital proof-of-custody
+                </p>
 
-                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                        <div class="text-[10px] font-bold text-emerald-800 uppercase">Stage 2</div>
-                        <div class="font-bold text-slate-900 text-sm">Collector Picked</div>
-                        <div class="text-xs text-slate-500 mt-1">Scale Weight & QR Timestamp Stamp</div>
-                        <span class="mt-2 inline-block px-2 py-0.5 bg-emerald-200 text-emerald-900 text-[10px] font-bold rounded">Tamper-Proof</span>
-                    </div>
-
-                    <div class="p-4 bg-amber-50 border border-amber-300 rounded-xl">
-                        <div class="text-[10px] font-bold text-amber-800 uppercase">Stage 3</div>
-                        <div class="font-bold text-slate-900 text-sm">Depot Batch Aggregator</div>
-                        <div class="text-xs text-slate-500 mt-1">Micro-Pickups Bulk Aggregation</div>
-                        <span class="mt-2 inline-block px-2 py-0.5 bg-amber-200 text-amber-900 text-[10px] font-bold rounded">In Progress</span>
-                    </div>
-
-                    <div class="p-4 bg-slate-100 border border-slate-200 rounded-xl opacity-75">
-                        <div class="text-[10px] font-bold text-slate-600 uppercase">Stage 4</div>
-                        <div class="font-bold text-slate-900 text-sm">Processor Biodiesel Batch</div>
-                        <div class="text-xs text-slate-500 mt-1">Conversion Batch ID Generated</div>
-                        <span class="mt-2 inline-block px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded">Awaiting Bulk Receipt</span>
-                    </div>
-                </div>
             </div>
 
-            <!-- Batch Aggregator Table -->
-            <div class="glass-card rounded-xl p-5 shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                        <i data-lucide="package-check" class="text-emerald-700"></i> Depot Bulk Batches & Conversion Pass
-                    </h3>
-                    <button @click="alert('New Bulk Batch Aggregated from 12 Clustered Pickups.')" class="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold flex items-center gap-1">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Aggregate Micro-Pickups
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left text-slate-600">
-                        <thead class="bg-slate-100 text-slate-700 uppercase text-[10px] font-bold">
-                            <tr>
-                                <th class="p-3">Batch ID</th>
-                                <th class="p-3">Aggregator Hub / Depot</th>
-                                <th class="p-3">Bulk Volume</th>
-                                <th class="p-3">Lab Purity Assessment</th>
-                                <th class="p-3">Pipeline Status</th>
-                                <th class="p-3 text-right">Audit Trail</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <template x-for="b in data.batches" :key="b.id">
-                                <tr class="hover:bg-slate-50">
-                                    <td class="p-3 font-bold text-slate-900" x-text="b.id"></td>
-                                    <td class="p-3" x-text="b.depot"></td>
-                                    <td class="p-3 font-semibold text-emerald-800" x-text="b.volume"></td>
-                                    <td class="p-3" x-text="b.purity"></td>
-                                    <td class="p-3">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800" x-text="b.status"></span>
-                                    </td>
-                                    <td class="p-3 text-right">
-                                        <button @click="alert('Viewing Complete Immutable Audit Log for Batch ' + b.id)" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded font-bold text-slate-800">
-                                            View Audit Log
-                                        </button>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <a
+                href="{% url 'generator_pickups' %}"
+                class="text-xs font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1">
+
+                <span>View Full History</span>
+
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+
+            </a>
+
         </div>
 
-    </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-slate-900 text-slate-400 text-xs py-4 text-center border-t border-slate-800">
-        UCO Connect Prototype &bull; Smart India Hackathon 2026 &bull; Team COGNEXA
-    </footer>
+        <div class="overflow-x-auto">
 
-    <!-- APP ENGINE JAVASCRIPT -->
-    <script>
-        function appData(mockData) {
-            return {
-                activeTab: 'generator',
-                data: mockData,
-                mapInitialized: false,
-                map: null,
-                showProofModal: false,
-                modalData: { name: '', scaleWeight: 0, pickupRef: null },
-                form: {
-                    volume: '',
-                    grade: 'Grade A',
-                    pickup_time: '',
-                    gps: '28.6315° N, 77.2167° E'
-                },
-                initApp() {
-                    this.$nextTick(() => {
-                        lucide.createIcons();
-                        this.initYieldChart();
-                    });
-                },
-                getGPS() {
-                    this.form.gps = "28.6328° N, 77.2195° E (GPS Locked)";
-                },
-                submitPickupRequest() {
-                    alert('Pickup Request submitted successfully! Added to Geo-Clustering engine.');
-                    this.form.volume = '';
-                },
-                initYieldChart() {
-                    const ctx = document.getElementById('yieldChart');
-                    if(!ctx) return;
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: this.data.yield_history.map(d => d.day),
-                            datasets: [{
-                                label: 'Historical Oil Yield (Liters)',
-                                data: this.data.yield_history.map(d => d.yield),
-                                borderColor: '#059669',
-                                backgroundColor: 'rgba(5, 150, 105, 0.1)',
-                                fill: true,
-                                tension: 0.3
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true } }
-                        }
-                    });
-                },
-                renderMap() {
-                    if (this.mapInitialized) return;
-                    this.mapInitialized = true;
-                    
-                    this.map = L.map('controlTowerMap').setView([28.6315, 77.2167], 14);
-                    
-                   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    subdomains: 'abcd',
-    maxZoom: 20
-}).addTo(this.map);
+            <table class="w-full text-left text-xs">
 
-                    // Add markers for cluster pickups
-                    const cluster = this.data.clusters[0];
-                    cluster.pickups.forEach(p => {
-                        L.marker([p.lat, p.lng])
-                         .addTo(this.map)
-                         .bindPopup(`<b>${p.name}</b><br>Est: ${p.liters} Liters`);
-                    });
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
 
-                    // Add Cluster Boundary Circle
-                    L.circle([28.6315, 77.2167], {
-                        color: '#d97706',
-                        fillColor: '#f59e0b',
-                        fillOpacity: 0.15,
-                        radius: 800
-                    }).addTo(this.map);
-                },
-                openProofModal(pickup) {
-                    this.modalData.name = pickup.name;
-                    this.modalData.scaleWeight = pickup.liters;
-                    this.modalData.pickupRef = pickup;
-                    this.showProofModal = true;
-                    this.$nextTick(() => lucide.createIcons());
-                },
-                completeVerification() {
-                    if(this.modalData.pickupRef) {
-                        this.modalData.pickupRef.status = 'Completed';
-                    }
-                    this.showProofModal = false;
-                    alert('Digital Receipt Generated & Signed! Chain of custody updated.');
-                }
-            }
+                    <tr>
+
+                        <th class="py-3 px-4">
+                            Tracking Code
+                        </th>
+
+                        <th class="py-3 px-4">
+                            Container QR
+                        </th>
+
+                        <th class="py-3 px-4">
+                            Est. Quantity
+                        </th>
+
+                        <th class="py-3 px-4">
+                            Pickup Date
+                        </th>
+
+                        <th class="py-3 px-4">
+                            Status
+                        </th>
+
+                        <th class="py-3 px-4">
+                            Collector
+                        </th>
+
+                        <th class="py-3 px-4 text-right">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100 font-medium">
+
+                    {% for p in recent_pickups %}
+
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+
+                        <td class="py-3.5 px-4 font-mono font-bold text-brand-950">
+                            {{ p.tracking_code }}
+                        </td>
+
+                        <td class="py-3.5 px-4 font-mono text-slate-500">
+
+                            <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] font-semibold text-slate-700">
+
+                                {{ p.container_qr_code }}
+
+                            </span>
+
+                        </td>
+
+                        <td class="py-3.5 px-4 font-bold text-slate-800">
+
+                            {{ p.quantity_liters }} L
+
+                        </td>
+
+                        <td class="py-3.5 px-4 text-slate-500">
+
+                            {{ p.pickup_date|date:"d M Y" }}
+
+                            <span class="block text-[10px] text-slate-400">
+                                {{ p.preferred_time_slot }}
+                            </span>
+
+                        </td>
+
+                        <td class="py-3.5 px-4">
+
+                            {% if p.status == 'REQUESTED' %}
+
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+
+                                Requested
+
+                            </span>
+
+                            {% elif p.status == 'CLUSTERED' %}
+
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+
+                                Clustered
+
+                            </span>
+
+                            {% elif p.status == 'ASSIGNED' %}
+
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+
+                                Collector Assigned
+
+                            </span>
+
+                            {% elif p.status == 'COLLECTED' %}
+
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+
+                                Verified &amp; Collected
+
+                            </span>
+
+                            {% elif p.status == 'AT_DEPOT' or p.status == 'RECONCILED' %}
+
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+
+                                <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+
+                                At Depot Bay
+
+                            </span>
+
+                            {% elif p.status == 'COMPLETED' %}
+
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+
+                                <i class="fa-solid fa-check text-[9px]"></i>
+
+                                Refined to Biodiesel
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+
+                                {{ p.get_status_display }}
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="py-3.5 px-4 text-slate-600">
+
+                            {% if p.collector %}
+
+                            <span class="font-semibold text-slate-800">
+
+                                {{ p.collector.get_full_name|default:p.collector.username }}
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="text-slate-400 italic">
+                                Assigning nearest fleet...
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="py-3.5 px-4 text-right space-x-1.5">
+
+                            <a
+                                href="{% url 'chain_of_custody_view' p.tracking_code %}"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-colors">
+
+                                <i class="fa-solid fa-link text-[10px]"></i>
+
+                                Custody
+
+                            </a>
+
+
+                            {% if p.status in 'COLLECTED,AT_DEPOT,RECONCILED,SENT_TO_PROCESSOR,COMPLETED' %}
+
+                            <a
+                                href="{% url 'view_certificate' p.id %}"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-[11px] font-bold transition-colors">
+
+                                <i class="fa-solid fa-certificate text-[10px]"></i>
+
+                                Certificate
+
+                            </a>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="py-8 text-center text-slate-400">
+
+                            <i class="fa-solid fa-inbox text-2xl mb-2 block text-slate-300"></i>
+
+                            No pickup requests found.
+                            Click "Schedule UCO Pickup" above to submit your first request.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- PICKUP MODAL -->
+<!-- ========================================================= -->
+
+<div
+    id="pickupModal"
+    class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden">
+
+        <div class="bg-gradient-to-r from-brand-950 to-brand-900 text-white p-6 flex items-center justify-between">
+
+            <div>
+
+                <h3 class="font-black text-xl text-white">
+                    Schedule UCO Collection
+                </h3>
+
+                <p class="text-xs text-slate-300 mt-0.5">
+                    Micro-collection aggregation &bull; Guaranteed ₹50/L settlement
+                </p>
+
+            </div>
+
+            <button
+                onclick="closePickupModal()"
+                class="text-slate-400 hover:text-white p-2">
+
+                <i class="fa-solid fa-xmark text-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <form
+            action="{% url 'generator_request_pickup' %}"
+            method="POST"
+            class="p-6 space-y-4 text-xs">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="latitude"
+                id="geo_lat"
+                value="19.0596">
+
+            <input
+                type="hidden"
+                name="longitude"
+                id="geo_lng"
+                value="72.8360">
+
+
+            <div>
+
+                <label class="block font-bold text-slate-700 uppercase mb-1">
+                    Restaurant / Kitchen Name
+                </label>
+
+                <input
+                    type="text"
+                    name="restaurant_name"
+                    value="{{ user.profile.business_name|default:user.username }}"
+                    required
+                    class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <div>
+
+                    <label class="block font-bold text-slate-700 uppercase mb-1">
+                        Est. Litres of UCO
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.5"
+                        name="quantity_liters"
+                        required
+                        placeholder="e.g. 15.0"
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">
+
+                    <span class="text-[10px] text-slate-400 mt-0.5 block">
+                        2–3L daily micro-volumes welcome
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label class="block font-bold text-slate-700 uppercase mb-1">
+                        Preferred Pickup Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="pickup_date"
+                        required
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">
+
+                </div>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <div>
+
+                    <label class="block font-bold text-slate-700 uppercase mb-1">
+                        Preferred Time Window
+                    </label>
+
+                    <select
+                        name="preferred_time_slot"
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">
+
+                        <option value="Morning (09:00 - 12:00)">
+                            Morning (09:00 - 12:00)
+                        </option>
+
+                        <option value="Afternoon (14:00 - 17:00)">
+                            Afternoon (14:00 - 17:00)
+                        </option>
+
+                        <option value="Evening (18:00 - 20:00)">
+                            Evening (18:00 - 20:00)
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label class="block font-bold text-slate-700 uppercase mb-1">
+                        Contact Phone
+                    </label>
+
+                    <input
+                        type="text"
+                        name="contact_phone"
+                        value="{{ user.profile.phone }}"
+                        placeholder="+91 98200..."
+                        class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="flex items-center justify-between mb-1">
+
+                    <label class="font-bold text-slate-700 uppercase">
+                        Pickup Address
+                    </label>
+
+                    <button
+                        type="button"
+                        onclick="detectGPSLocation()"
+                        id="gpsBtn"
+                        class="text-[11px] text-brand-700 hover:text-brand-900 font-bold flex items-center gap-1">
+
+                        <i class="fa-solid fa-location-crosshairs text-emerald-600"></i>
+
+                        <span>
+                            Auto-Detect My GPS
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <textarea
+                    name="address"
+                    rows="2"
+                    required
+                    placeholder="Full physical street address for collector route navigation"
+                    class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">{{ user.profile.address }}</textarea>
+
+
+                <p
+                    id="gpsStatusText"
+                    class="text-[10px] text-emerald-600 mt-1 hidden">
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <label class="block font-bold text-slate-700 uppercase mb-1">
+                    Special Notes / Oil Grade
+                </label>
+
+                <input
+                    type="text"
+                    name="notes"
+                    placeholder="e.g., Sunflower frying oil, strained of solid batter crumbs"
+                    class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-slate-800">
+
+            </div>
+
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+
+                <button
+                    type="button"
+                    onclick="closePickupModal()"
+                    class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="px-5 py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold shadow-md">
+
+                    Submit Pickup Request
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
+
+<script>
+
+    /* =========================================================
+       MODAL
+       ========================================================= */
+
+    function openPickupModal() {
+
+        const modal =
+            document.getElementById('pickupModal');
+
+        if (modal) {
+            modal.classList.remove('hidden');
         }
-    </script>
-</body>
-</html>
+
+    }
+
+
+    function closePickupModal() {
+
+        const modal =
+            document.getElementById('pickupModal');
+
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+
+    }
+
+
+    /* =========================================================
+       GPS
+       ========================================================= */
+
+    function detectGPSLocation() {
+
+        const statusText =
+            document.getElementById('gpsStatusText');
+
+        const btn =
+            document.getElementById('gpsBtn');
+
+
+        if (!navigator.geolocation) {
+
+            alert(
+                'Geolocation is not supported by your browser.'
+            );
+
+            return;
+
+        }
+
+
+        btn.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Detecting...';
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            function(position) {
+
+                const lat =
+                    position.coords.latitude;
+
+                const lng =
+                    position.coords.longitude;
+
+
+                document.getElementById('geo_lat').value =
+                    lat.toFixed(6);
+
+                document.getElementById('geo_lng').value =
+                    lng.toFixed(6);
+
+
+                btn.innerHTML =
+                    '<i class="fa-solid fa-circle-check text-emerald-600"></i> Location Detected';
+
+
+                statusText.textContent =
+                    `GPS Captured: (${lat.toFixed(4)}, ${lng.toFixed(4)}) • Accuracy: ${position.coords.accuracy.toFixed(0)}m`;
+
+
+                statusText.classList.remove('hidden');
+
+            },
+
+
+            function() {
+
+                btn.innerHTML =
+                    '<i class="fa-solid fa-location-crosshairs text-amber-600"></i> Auto-Detect My GPS';
+
+
+                statusText.textContent =
+                    'GPS permission unavailable or denied. Using default cluster center.';
+
+
+                statusText.classList.remove('hidden');
+
+                statusText.classList.add('text-amber-600');
+
+            },
+
+
+            {
+                timeout: 10000,
+                enableHighAccuracy: true
+            }
+
+        );
+
+    }
+
+
+    /* =========================================================
+       LIVE MAP
+       ========================================================= */
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function() {
+
+            const mapContainer =
+                document.getElementById('generatorLiveMap');
+
+
+            if (!mapContainer) {
+
+                console.error(
+                    'generatorLiveMap container not found.'
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * Default locations
+             */
+
+            const generatorPos = [
+                19.0596,
+                72.8360
+            ];
+
+
+            const depotPos = [
+                19.0800,
+                72.8800
+            ];
+
+
+            /*
+             * Create Leaflet map
+             */
+
+            const map =
+                L.map(
+                    'generatorLiveMap',
+                    {
+                        zoomControl: true,
+                        scrollWheelZoom: false,
+                        dragging: true,
+                        doubleClickZoom: true,
+                        touchZoom: true
+                    }
+                );
+
+
+            map.setView(
+                generatorPos,
+                13
+            );
+
+
+            /*
+             * IMPORTANT:
+             *
+             * OpenStreetMap tile server removed.
+             *
+             * Using Esri World Street Map.
+             */
+
+            L.tileLayer(
+
+                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+
+                {
+
+                    maxZoom: 19,
+
+                    minZoom: 2,
+
+                    attribution: '&copy; Esri'
+
+                }
+
+            ).addTo(map);
+
+
+            /*
+             * Kitchen Icon
+             */
+
+            const kitchenIcon =
+                L.divIcon({
+
+                    html: `
+                        <div class="w-8 h-8 bg-emerald-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white">
+                            <i class="fa-solid fa-utensils text-xs"></i>
+                        </div>
+                    `,
+
+                    className: '',
+
+                    iconSize: [
+                        32,
+                        32
+                    ],
+
+                    iconAnchor: [
+                        16,
+                        16
+                    ]
+
+                });
+
+
+            /*
+             * Truck Icon
+             */
+
+            const truckIcon =
+                L.divIcon({
+
+                    html: `
+                        <div class="w-9 h-9 bg-indigo-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white">
+                            <i class="fa-solid fa-truck-fast text-xs"></i>
+                        </div>
+                    `,
+
+                    className: '',
+
+                    iconSize: [
+                        36,
+                        36
+                    ],
+
+                    iconAnchor: [
+                        18,
+                        18
+                    ]
+
+                });
+
+
+            /*
+             * Depot Icon
+             */
+
+            const depotIcon =
+                L.divIcon({
+
+                    html: `
+                        <div class="w-8 h-8 bg-purple-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white">
+                            <i class="fa-solid fa-warehouse text-xs"></i>
+                        </div>
+                    `,
+
+                    className: '',
+
+                    iconSize: [
+                        32,
+                        32
+                    ],
+
+                    iconAnchor: [
+                        16,
+                        16
+                    ]
+
+                });
+
+
+            /*
+             * Kitchen Marker
+             */
+
+            L.marker(
+
+                generatorPos,
+
+                {
+                    icon: kitchenIcon
+                }
+
+            )
+            .addTo(map)
+            .bindPopup(
+                '<b>Your Kitchen Location</b><br>Pickup Spot'
+            );
+
+
+            /*
+             * Depot Marker
+             */
+
+            L.marker(
+
+                depotPos,
+
+                {
+                    icon: depotIcon
+                }
+
+            )
+            .addTo(map)
+            .bindPopup(
+                '<b>Central UCO Depot Bay</b>'
+            );
+
+
+            /*
+             * Route
+             */
+
+            const routePoints = [
+
+                depotPos,
+
+                [
+                    19.0700,
+                    72.8600
+                ],
+
+                [
+                    19.0620,
+                    72.8450
+                ],
+
+                generatorPos
+
+            ];
+
+
+            /*
+             * Route Line
+             */
+
+            L.polyline(
+
+                routePoints,
+
+                {
+
+                    weight: 4,
+
+                    dashArray: '8, 8',
+
+                    lineCap: 'round'
+
+                }
+
+            ).addTo(map);
+
+
+            /*
+             * Truck Marker
+             */
+
+            const truckMarker =
+                L.marker(
+
+                    routePoints[1],
+
+                    {
+                        icon: truckIcon
+                    }
+
+                )
+                .addTo(map)
+                .bindPopup(
+                    '<b>EV Collector Truck #04</b><br>En Route to your Location'
+                );
+
+
+            /*
+             * Fit entire route
+             */
+
+            const bounds =
+                L.latLngBounds(
+                    routePoints
+                );
+
+
+            map.fitBounds(
+
+                bounds,
+
+                {
+                    padding: [
+                        40,
+                        40
+                    ]
+                }
+
+            );
+
+
+            /*
+             * Fix Leaflet rendering
+             */
+
+            setTimeout(
+                function() {
+
+                    map.invalidateSize();
+
+                },
+                500
+            );
+
+
+            window.addEventListener(
+                'resize',
+                function() {
+
+                    map.invalidateSize();
+
+                }
+            );
+
+
+            /*
+             * Truck movement
+             */
+
+            let step = 1;
+
+
+            setInterval(
+                function() {
+
+                    step++;
+
+
+                    if (
+                        step >= routePoints.length
+                    ) {
+
+                        step = 0;
+
+                    }
+
+
+                    truckMarker.setLatLng(
+                        routePoints[step]
+                    );
+
+                },
+                4000
+            );
+
+
+            console.log(
+                'UCO-Connect map initialized successfully.'
+            );
+
+        }
+    );
+
+</script>
+
+{% endblock %}

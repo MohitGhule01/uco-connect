@@ -1,0 +1,134 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Chain of Custody - {{ pickup.tracking_code }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Tamper-Proof Audit Provenance
+            </span>
+            <h1 class="text-2xl font-black text-slate-900 mt-1">Chain of Custody: {{ pickup.tracking_code }}</h1>
+            <p class="text-xs text-slate-500">Container QR: <code class="font-mono text-slate-700 font-bold">{{ pickup.container_qr_code }}</code></p>
+        </div>
+        <a href="{% url 'dashboard' %}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors w-fit">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    <!-- 4-Stage Visual Timeline Stepper -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-10 space-y-8">
+        
+        <!-- Stage 1: UCO Generation -->
+        <div class="flex items-start gap-4 sm:gap-6 relative pb-8 border-l-2 border-emerald-500 pl-6 ml-4">
+            <div class="absolute -left-[17px] top-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black shadow-md">
+                1
+            </div>
+            <div class="flex-1 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black text-slate-900">UCO Generation &amp; Request</h3>
+                    <span class="text-[10px] font-bold text-slate-400 font-mono">{{ pickup.created_at|date:"d M Y, H:i" }}</span>
+                </div>
+                <div class="mt-2 text-xs space-y-1 text-slate-600">
+                    <p><strong>Restaurant:</strong> {{ pickup.restaurant_name }}</p>
+                    <p><strong>Estimated Volume:</strong> {{ pickup.quantity_liters }} Liters</p>
+                    <p><strong>Address:</strong> {{ pickup.address }}</p>
+                    <p><strong>Coordinates:</strong> ({{ pickup.latitude }}, {{ pickup.longitude }})</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 2: Collector Verification Gate -->
+        <div class="flex items-start gap-4 sm:gap-6 relative pb-8 border-l-2 {% if verification %}border-emerald-500{% else %}border-slate-200{% endif %} pl-6 ml-4">
+            <div class="absolute -left-[17px] top-0 w-8 h-8 rounded-full {% if verification %}bg-emerald-600 text-white{% else %}bg-slate-200 text-slate-500{% endif %} flex items-center justify-center text-xs font-black shadow-md">
+                2
+            </div>
+            <div class="flex-1 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black text-slate-900">Collector Verification Gate</h3>
+                    {% if verification %}
+                        <span class="text-[10px] font-bold text-slate-400 font-mono">{{ verification.verified_at|date:"d M Y, H:i" }}</span>
+                    {% else %}
+                        <span class="text-[10px] font-bold text-amber-600 uppercase">In Route Scheduling</span>
+                    {% endif %}
+                </div>
+                {% if verification %}
+                    <div class="mt-2 text-xs space-y-1 text-slate-600">
+                        <p><strong>Collector:</strong> {{ verification.collector.get_full_name|default:verification.collector.username }}</p>
+                        <p><strong>Container QR Match:</strong> <span class="text-emerald-700 font-bold"><i class="fa-solid fa-check text-[10px]"></i> {{ verification.scanned_qr }}</span></p>
+                        <p><strong>Scale Measured Weight:</strong> <strong class="text-slate-900">{{ verification.verified_weight_liters }} Liters</strong> (Variance: {{ verification.discrepancy_liters }}L, {{ verification.discrepancy_percent }}%)</p>
+                        <p><strong>GPS Captured:</strong> ({{ verification.verified_latitude }}, {{ verification.verified_longitude }})</p>
+                        {% if verification.photo_evidence %}
+                            <div class="mt-2">
+                                <p class="text-[10px] font-bold text-slate-500 uppercase">Scale Photo Evidence:</p>
+                                <img src="{{ verification.photo_evidence.url }}" alt="Evidence" class="mt-1 max-h-32 rounded-lg border border-slate-200">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-xs text-slate-500 mt-2">Awaiting collector physical scan, GPS capture, scale measurement, and photo evidence.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stage 3: Depot Aggregation & Batch Reconciliation -->
+        <div class="flex items-start gap-4 sm:gap-6 relative pb-8 border-l-2 {% if batch %}border-emerald-500{% else %}border-slate-200{% endif %} pl-6 ml-4">
+            <div class="absolute -left-[17px] top-0 w-8 h-8 rounded-full {% if batch %}bg-emerald-600 text-white{% else %}bg-slate-200 text-slate-500{% endif %} flex items-center justify-center text-xs font-black shadow-md">
+                3
+            </div>
+            <div class="flex-1 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black text-slate-900">Depot Batch Reconciliation &amp; Seal</h3>
+                    {% if batch %}
+                        <span class="text-[10px] font-bold text-slate-400 font-mono">{{ batch.created_at|date:"d M Y, H:i" }}</span>
+                    {% else %}
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Pending Depot Intake</span>
+                    {% endif %}
+                </div>
+                {% if batch %}
+                    <div class="mt-2 text-xs space-y-1 text-slate-600">
+                        <p><strong>Aggregated Batch:</strong> <code class="font-mono text-purple-900 font-bold">{{ batch.batch_code }}</code></p>
+                        <p><strong>Security Seal:</strong> <code class="font-mono text-slate-700 font-bold">{{ batch.seal_number }}</code></p>
+                        <p><strong>Aggregated Volume:</strong> {{ batch.expected_quantity_liters }} Liters</p>
+                        <p><strong>Depot Hub:</strong> {{ batch.depot.profile.business_name|default:batch.depot.username }}</p>
+                    </div>
+                {% else %}
+                    <p class="text-xs text-slate-500 mt-2">Will be grouped into a sealed batch upon delivery at the aggregation depot.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stage 4: Biodiesel Conversion -->
+        <div class="flex items-start gap-4 sm:gap-6 relative pl-6 ml-4">
+            <div class="absolute -left-[17px] top-0 w-8 h-8 rounded-full {% if conversion %}bg-emerald-600 text-white{% else %}bg-slate-200 text-slate-500{% endif %} flex items-center justify-center text-xs font-black shadow-md">
+                4
+            </div>
+            <div class="flex-1 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black text-slate-900">Biodiesel Bio-Refinery Conversion</h3>
+                    {% if conversion %}
+                        <span class="text-[10px] font-bold text-slate-400 font-mono">{{ conversion.conversion_date|date:"d M Y, H:i" }}</span>
+                    {% else %}
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Awaiting Refinery Intake</span>
+                    {% endif %}
+                </div>
+                {% if conversion %}
+                    <div class="mt-2 text-xs space-y-1 text-slate-600">
+                        <p><strong>Authorized Refinery:</strong> {{ conversion.processor.profile.business_name|default:conversion.processor.username }}</p>
+                        <p><strong>Biodiesel Produced:</strong> <strong class="text-emerald-700 font-black">{{ conversion.biodiesel_output_liters }} Liters</strong> (~{{ conversion.efficiency_percentage }}% efficiency)</p>
+                        <p><strong>Glycerin Byproduct:</strong> {{ conversion.glycerin_byproduct_kg }} kg</p>
+                        <p><strong>Total Polar Compounds (TPC):</strong> {{ conversion.tpc_tested_percentage }}% (IS 15607 Compliant)</p>
+                    </div>
+                {% else %}
+                    <p class="text-xs text-slate-500 mt-2">Transesterification into certified renewable biodiesel will occur upon batch receipt.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

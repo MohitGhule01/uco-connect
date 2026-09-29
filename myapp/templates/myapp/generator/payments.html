@@ -1,0 +1,60 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Instant Payouts Ledger - UCO-Connect{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900">Instant Digital Payouts Ledger</h1>
+            <p class="text-xs text-slate-500">Transparent ₹50.00 / Liter compensation settled upon verified digital collection</p>
+        </div>
+        <div class="bg-emerald-50 px-4 py-2.5 rounded-2xl border border-emerald-200 flex items-center gap-3">
+            <span class="text-xs text-emerald-800 font-medium">Total Settled:</span>
+            <span class="text-xl font-black text-emerald-900">₹{{ total_paid }}</span>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                    <tr>
+                        <th class="py-3 px-4">Transaction Reference</th>
+                        <th class="py-3 px-4">Pickup Code</th>
+                        <th class="py-3 px-4">Verified Liters</th>
+                        <th class="py-3 px-4">Guaranteed Rate</th>
+                        <th class="py-3 px-4">Total Amount</th>
+                        <th class="py-3 px-4">Settlement Status</th>
+                        <th class="py-3 px-4">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    {% for p in payments %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ p.transaction_id }}</td>
+                            <td class="py-3.5 px-4 font-mono text-brand-900">{{ p.pickup.tracking_code }}</td>
+                            <td class="py-3.5 px-4 font-bold text-slate-800">{{ p.liters }} L</td>
+                            <td class="py-3.5 px-4 text-slate-600">₹{{ p.rate_per_liter }} / L</td>
+                            <td class="py-3.5 px-4 font-black text-emerald-700 text-sm">₹{{ p.total_amount }}</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    <i class="fa-solid fa-check text-[9px] mr-0.5"></i> {{ p.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">{{ p.payment_date|date:"d M Y, H:i"|default:p.created_at|date:"d M Y, H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-8 text-center text-slate-400">
+                                No payouts recorded yet. Payments are generated automatically when collections are verified.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

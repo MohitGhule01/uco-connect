@@ -1,0 +1,14 @@
+{% extends 'myapp/base.html' %}
+{% block title %}Page Not Found - UCO-Connect{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto py-20 px-4 text-center">
+    <div class="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl mx-auto mb-4 font-bold border border-amber-200">
+        <i class="fa-solid fa-compass"></i>
+    </div>
+    <h1 class="text-3xl font-black text-slate-900">404 - Destination Not Found</h1>
+    <p class="text-xs text-slate-500 mt-2">The route or resource you requested is not mapped in the network.</p>
+    <a href="{% url 'dashboard' %}" class="mt-6 inline-block px-6 py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs shadow-md">
+        Return to Dashboard
+    </a>
+</div>
+{% endblock %}

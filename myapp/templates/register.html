@@ -1,0 +1,113 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Register - Join UCO-Connect Network{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-brand-950 via-brand-900 to-slate-900 text-white p-8">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-800 text-brand-200 text-[11px] font-semibold border border-brand-700 mb-2">
+                <span>FSSAI RUCO Compliant Network</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black">Register on UCO-Connect</h2>
+            <p class="text-xs text-slate-300 mt-1">Join the organized network converting waste cooking oil into renewable biodiesel.</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" class="p-8 space-y-6">
+            {% csrf_token %}
+
+            <!-- Role Selection -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Your Role</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <label class="cursor-pointer border border-slate-200 rounded-xl p-3 text-center hover:border-brand-500 transition-all has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50/50">
+                        <input type="radio" name="role" value="GENERATOR" checked class="sr-only">
+                        <i class="fa-solid fa-utensils text-brand-700 text-lg mb-1 block"></i>
+                        <span class="text-xs font-bold text-slate-800 block">Generator</span>
+                        <span class="text-[10px] text-slate-500 block">Restaurant / Food</span>
+                    </label>
+
+                    <label class="cursor-pointer border border-slate-200 rounded-xl p-3 text-center hover:border-brand-500 transition-all has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50/50">
+                        <input type="radio" name="role" value="COLLECTOR" class="sr-only">
+                        <i class="fa-solid fa-truck text-blue-600 text-lg mb-1 block"></i>
+                        <span class="text-xs font-bold text-slate-800 block">Collector</span>
+                        <span class="text-[10px] text-slate-500 block">Micro-Fleet</span>
+                    </label>
+
+                    <label class="cursor-pointer border border-slate-200 rounded-xl p-3 text-center hover:border-brand-500 transition-all has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50/50">
+                        <input type="radio" name="role" value="DEPOT" class="sr-only">
+                        <i class="fa-solid fa-warehouse text-purple-600 text-lg mb-1 block"></i>
+                        <span class="text-xs font-bold text-slate-800 block">Depot</span>
+                        <span class="text-[10px] text-slate-500 block">Aggregator Hub</span>
+                    </label>
+
+                    <label class="cursor-pointer border border-slate-200 rounded-xl p-3 text-center hover:border-brand-500 transition-all has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50/50">
+                        <input type="radio" name="role" value="PROCESSOR" class="sr-only">
+                        <i class="fa-solid fa-oil-well text-emerald-600 text-lg mb-1 block"></i>
+                        <span class="text-xs font-bold text-slate-800 block">Processor</span>
+                        <span class="text-[10px] text-slate-500 block">Bio-Refinery</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Account Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username</label>
+                    <input type="text" name="username" required placeholder="Choose a username" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address</label>
+                    <input type="email" name="email" required placeholder="name@business.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <input type="password" name="password" required placeholder="Create a secure password" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Phone</label>
+                    <input type="text" name="phone" placeholder="+91 98200 00000" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+            </div>
+
+            <!-- Business & Compliance Details -->
+            <div class="space-y-4 pt-2 border-t border-slate-100">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Business / Restaurant Name</label>
+                        <input type="text" name="business_name" placeholder="e.g. Green Bowl Bistro" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">FSSAI / RUCO License Number (Optional)</label>
+                        <input type="text" name="fssai_license" placeholder="e.g. FSSAI-11521008000451" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pickup / Physical Address</label>
+                    <textarea name="address" rows="2" placeholder="Full street address and landmark" class="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"></textarea>
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow-md transition-all">
+                    Complete Registration &amp; Open Cockpit
+                </button>
+            </div>
+        </form>
+
+        <div class="p-4 bg-slate-50 border-t border-slate-100 text-center">
+            <p class="text-xs text-slate-500">
+                Already registered? <a href="{% url 'login' %}" class="text-brand-700 font-bold hover:underline">Log in here</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Sign In - UCO-Connect Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Left Side: Quick 1-Click Demo Portals for Evaluators -->
+        <div class="lg:col-span-6 bg-gradient-to-br from-brand-950 to-brand-900 text-white p-8 rounded-3xl border border-brand-800 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-800/80 pb-4 mb-6">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 px-2 py-0.5 rounded bg-brand-900 border border-brand-700">SIH 2026 Evaluation Deck</span>
+                    <h2 class="text-2xl font-black text-white mt-1">One-Click Role Portals</h2>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-300 mb-6 leading-relaxed">
+                Click any role button below to instantly log in as that persona and inspect the end-to-end workflow:
+            </p>
+
+            <form method="POST" class="space-y-3">
+                {% csrf_token %}
+                <button type="submit" name="demo_role" value="ADMIN" class="w-full p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-emerald-500 text-left transition-all group flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-tower-broadcast"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white group-hover:text-emerald-300">Admin / Operations Tower</p>
+                            <p class="text-[11px] text-slate-400">Master map, micro-clustering, fleet routing, anomaly alerts</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-emerald-400 text-xs transition-colors"></i>
+                </button>
+
+                <button type="submit" name="demo_role" value="GENERATOR" class="w-full p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-emerald-500 text-left transition-all group flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white group-hover:text-amber-300">UCO Generator (Restaurant)</p>
+                            <p class="text-[11px] text-slate-400">Request pickup, GPS autofill, instant payouts, RUCO certificates</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-amber-400 text-xs transition-colors"></i>
+                </button>
+
+                <button type="submit" name="demo_role" value="COLLECTOR" class="w-full p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-emerald-500 text-left transition-all group flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-truck"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white group-hover:text-blue-300">UCO Collector App</p>
+                            <p class="text-[11px] text-slate-400">Active TSP route map, QR scan, W3C GPS, digital scale, photos</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-blue-400 text-xs transition-colors"></i>
+                </button>
+
+                <button type="submit" name="demo_role" value="DEPOT" class="w-full p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-emerald-500 text-left transition-all group flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-warehouse"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white group-hover:text-purple-300">Depot Aggregator Bay</p>
+                            <p class="text-[11px] text-slate-400">Intake reconciliation, weight comparison, sealed batch dispatch</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-purple-400 text-xs transition-colors"></i>
+                </button>
+
+                <button type="submit" name="demo_role" value="PROCESSOR" class="w-full p-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-emerald-500 text-left transition-all group flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-oil-well"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white group-hover:text-emerald-300">Biofuel Processor</p>
+                            <p class="text-[11px] text-slate-400">Inspect full provenance chain, record biodiesel conversion yield</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-emerald-400 text-xs transition-colors"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 pt-4 border-t border-brand-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <span>Standard Demo Password:</span>
+                <code class="px-2 py-0.5 bg-slate-900 text-amber-300 rounded font-mono font-bold">Demo@12345</code>
+            </div>
+        </div>
+
+        <!-- Right Side: Standard Login Credentials Form -->
+        <div class="lg:col-span-6 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+            <div class="mb-6">
+                <span class="text-xs font-bold text-brand-700 uppercase tracking-wider">Account Access</span>
+                <h3 class="text-2xl font-black text-slate-900 mt-1">Sign In to UCO-Connect</h3>
+                <p class="text-xs text-slate-500 mt-1">Enter your registered email or username to access your cockpit.</p>
+            </div>
+
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username or Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-envelope text-sm"></i>
+                        </span>
+                        <input type="text" name="username" required autofocus placeholder="e.g. generator@example.com" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </span>
+                        <input type="password" name="password" required placeholder="Enter your password" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 px-4 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                        <span>Sign In to Dashboard</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-500">
+                    Need a new account? 
+                    <a href="{% url 'register' %}" class="text-brand-700 font-bold hover:underline ml-1">
+                        Register your Food Business
+                    </a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Interactive Route Navigation - UCO-Connect{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-200">
+                    100% Free OpenStreetMap &bull; Leaflet.js
+                </span>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 mt-1">Optimized Micro-Collection Route Map</h1>
+            <p class="text-xs text-slate-500">Algorithmic TSP routing with sequenced stop waypoints</p>
+        </div>
+        <a href="{% url 'collector_dashboard' %}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors flex items-center gap-1.5 w-fit">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Map & Side-by-Side Stop Checklist -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Interactive Leaflet Map -->
+        <div class="lg:col-span-8 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-3 px-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-xs font-bold text-slate-700">Live GPS Corridor (5 km Coverage Radius)</span>
+                </div>
+                <span class="text-[11px] text-slate-400 font-mono">Zero Paid Google Maps APIs &bull; Open-Source</span>
+            </div>
+
+            <!-- Leaflet Container -->
+            <div id="routeMap" class="w-full h-[500px] rounded-2xl border border-slate-200 z-10"></div>
+        </div>
+
+        <!-- Stop Sequence Cards -->
+        <div class="lg:col-span-4 space-y-3 overflow-y-auto max-h-[560px] pr-1">
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">Turn-By-Turn Stop Manifest</h3>
+
+            {% for s in stops %}
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-500 transition-all space-y-2">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-brand-900 text-brand-200 flex items-center justify-center font-black text-sm">
+                                {{ s.route_sequence|default:forloop.counter }}
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-900">{{ s.restaurant_name }}</h4>
+                                <span class="text-[10px] font-mono text-slate-400">{{ s.tracking_code }}</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            {{ s.quantity_liters }} L
+                        </span>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500 line-clamp-2">{{ s.address }}</p>
+
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <a href="tel:{{ s.contact_phone }}" class="text-blue-600 font-bold hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-phone text-[10px]"></i>
+                            <span>Call Generator</span>
+                        </a>
+                        <a href="{% url 'collector_verify' s.id %}" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm transition-colors">
+                            Verify Gate &rarr;
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="p-6 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
+                    No active route assigned. Please contact the Operations Tower.
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse stops data passed from Django view
+        const stopsData = {{ stops_json|safe }};
+
+        // Default center (Mumbai coordinates or first stop)
+        const centerLat = stopsData.length > 0 ? stopsData[0].lat : 19.0650;
+        const centerLng = stopsData.length > 0 ? stopsData[0].lng : 72.8450;
+
+        // Initialize Leaflet Map with free OpenStreetMap tiles
+        const map = L.map('routeMap').setView([centerLat, centerLng], 13);
+
+L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    {
+        maxZoom: 19,
+        minZoom: 2,
+        attribution: '&copy; Esri'
+    }
+).addTo(map);
+
+        const latlngs = [];
+
+        // Add custom markers for each sequenced stop
+        stopsData.forEach((stop, index) => {
+            const pos = [stop.lat, stop.lng];
+            latlngs.push(pos);
+
+            const markerHtml = `
+                <div style="background-color: #064e3b; color: #34d399; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                    ${stop.sequence || (index + 1)}
+                </div>
+            `;
+            const customIcon = L.divIcon({
+                html: markerHtml,
+                className: '',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+
+            const marker = L.marker(pos, { icon: customIcon }).addTo(map);
+            marker.bindPopup(`
+                <div style="font-family: sans-serif; font-size: 12px; padding: 2px;">
+                    <b style="color: #064e3b;">Stop #${stop.sequence || (index + 1)}: ${stop.restaurant_name}</b><br/>
+                    <span style="color: #64748b;">${stop.address}</span><br/>
+                    <b>Quantity:</b> ${stop.quantity} L<br/>
+                    <a href="/collector/verify/${stop.id}/" style="display: inline-block; margin-top: 5px; color: white; background: #059669; padding: 3px 8px; border-radius: 5px; text-decoration: none; font-weight: bold;">Verify Gate</a>
+                </div>
+            `);
+        });
+
+        // Draw polyline connecting stops in sequence
+        if (latlngs.length > 1) {
+            const polyline = L.polyline(latlngs, { color: '#059669', weight: 4, dashArray: '6, 8' }).addTo(map);
+            map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+        }
+    });
+</script>
+{% endblock %}

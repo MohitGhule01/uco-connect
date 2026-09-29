@@ -1,0 +1,444 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}UCO-Connect | Used Cooking Oil to Biodiesel Micro-Collection Network{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-b from-brand-950 via-brand-900 to-slate-900 text-white pt-16 pb-24 overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div class="lg:col-span-7 space-y-6">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-800/80 border border-brand-700 text-brand-200 text-xs font-semibold shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>Smart India Hackathon 2026 &bull; Idea Submission</span>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+                    From <span class="text-emerald-400 underline decoration-amber-500 underline-offset-8">2&ndash;3 Litres</span> of Waste Oil to <span class="text-amber-400">Verified Biodiesel</span>.
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                    <strong class="text-white font-semibold">UCO-Connect</strong> is a hyperlocal micro-collection and route-optimization platform that clusters small restaurants, street vendors, and canteens into economical daily routes with digital proof-of-custody.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-4 pt-2">
+                    <a href="{% url 'login' %}" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-brand-500 hover:from-emerald-400 hover:to-brand-400 text-brand-950 font-bold text-sm sm:text-base shadow-lg shadow-emerald-900/40 transition-all flex items-center gap-2">
+                        <span>One-Click Demo Logins</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="{% url 'register' %}" class="px-6 py-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-white border border-slate-700 font-semibold text-sm sm:text-base shadow-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-store text-emerald-400"></i>
+                        <span>Register as Generator</span>
+                    </a>
+                    <a href="#how-it-works" class="px-5 py-3.5 text-slate-300 hover:text-white font-semibold text-sm transition-colors">
+                        Learn How It Works &darr;
+                    </a>
+                </div>
+
+                <!-- Live Pilot Metrics Bar -->
+                <div class="pt-6 border-t border-brand-800/80 grid grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-black text-emerald-400">{{ total_generators|default:"38" }}+</p>
+                        <p class="text-xs text-slate-400 font-medium">Pilot Generators</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-black text-amber-400">{{ total_volume|default:"148.5" }} L</p>
+                        <p class="text-xs text-slate-400 font-medium">UCO Diverted</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-black text-emerald-300">{{ total_biodiesel|default:"132.2" }} L</p>
+                        <p class="text-xs text-slate-400 font-medium">Clean Biodiesel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Flow Mockup Card -->
+            <div class="lg:col-span-5">
+                <div class="bg-slate-800/90 rounded-2xl border border-slate-700 p-6 shadow-2xl backdrop-blur-sm relative">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="text-xs text-slate-400 font-mono ml-2">5-Step Verification Gate</span>
+                        </div>
+                        <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold uppercase">100% Free APIs</span>
+                    </div>
+
+                    <!-- Flow Steps -->
+                    <div class="space-y-3 font-mono text-xs">
+                        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">1</div>
+                                <div>
+                                    <p class="text-slate-200 font-bold">Generator Request</p>
+                                    <p class="text-[11px] text-slate-400">2–3L forecast + GPS coordinates</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded">INITIATED</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">2</div>
+                                <div>
+                                    <p class="text-slate-200 font-bold">Micro-Cluster Engine</p>
+                                    <p class="text-[11px] text-slate-400">Groups 5–10 stops within 5km</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-amber-400 font-semibold bg-amber-950/60 px-2 py-0.5 rounded">OPTIMIZED</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">3</div>
+                                <div>
+                                    <p class="text-slate-200 font-bold">Verification Gate</p>
+                                    <p class="text-[11px] text-slate-400">QR + GPS + Weight + Photo</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-blue-400 font-semibold bg-blue-950/60 px-2 py-0.5 rounded">SIGNED</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">4</div>
+                                <div>
+                                    <p class="text-slate-200 font-bold">Depot Reconciliation</p>
+                                    <p class="text-[11px] text-slate-400">Seals batch &bull; ₹50/L instant payout</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-purple-400 font-semibold bg-purple-950/60 px-2 py-0.5 rounded">BATCHED</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-emerald-900/30 border border-emerald-600/40 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center font-bold"><i class="fa-solid fa-check"></i></div>
+                                <div>
+                                    <p class="text-emerald-300 font-bold">Bio-Refinery Intake</p>
+                                    <p class="text-[11px] text-emerald-400/80">Refined into B100 Biodiesel</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-emerald-300 font-semibold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-700">COMPLETED</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Pilot Operating Model Banner -->
+<section id="pilot-model" class="bg-brand-900 text-white py-8 border-y border-brand-800 shadow-inner">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold border border-amber-500/30">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-base">Pilot Operating Model (Team Research)</h3>
+                    <p class="text-xs text-brand-200">50 generators &times; 2–3 L/day within 5 km &rarr; 125–150 L/day target with 1 collector in a 2.5–3h route window.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-800 text-brand-200 border border-brand-700">
+                    <i class="fa-solid fa-gas-pump text-amber-400 mr-1"></i> ₹50 / L Payout
+                </span>
+                <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-800 text-brand-200 border border-brand-700">
+                    <i class="fa-solid fa-certificate text-emerald-400 mr-1"></i> FSSAI RUCO Ready
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-xs font-bold uppercase tracking-wider text-brand-700 px-3 py-1 rounded-full bg-brand-50 border border-brand-200">
+                End-To-End Architecture
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-3 tracking-tight">
+                How UCO-Connect Bridges the Last-Mile
+            </h2>
+            <p class="text-slate-600 text-base mt-2">
+                A seamless, tamper-evident digital custody workflow from the kitchen fryer to the biofuel tank.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <!-- Step 1 -->
+            <div class="relative p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 hover:shadow-lg transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <span class="text-xs font-bold text-brand-600 uppercase">Stage 01</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1">UCO Generator</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Restaurant or vendor submits pickup request with estimated litres (2–3L), preferred time slot, and live GPS coordinates.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 hover:shadow-lg transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+                <span class="text-xs font-bold text-amber-600 uppercase">Stage 02</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1">Micro-Clustering</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Engine clusters 5–10 scattered nearby requests into an optimized TSP route (125–150L target) to cut fuel and travel time.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 hover:shadow-lg transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <span class="text-xs font-bold text-blue-600 uppercase">Stage 03</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1">Verification Gate</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Collector scans QR container, captures browser GPS, logs digital scale weight, uploads photo evidence, and triggers instant payout.
+                </p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="relative p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 hover:shadow-lg transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <span class="text-xs font-bold text-purple-600 uppercase">Stage 04</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1">Depot Reconcile</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Aggregation depot verifies collective weight, detects anomalies, applies digital security seal, and dispatches bulk batch.
+                </p>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="relative p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 hover:shadow-lg transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-oil-well"></i>
+                </div>
+                <span class="text-xs font-bold text-emerald-600 uppercase">Stage 05</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1">Biodiesel Refinery</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Authorized processor receives batch, verifies complete provenance chain, refines feedstock into clean B100 Biodiesel (~89% yield).
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem vs Solution Comparison -->
+<section class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Solving the Grassroots Logistics Challenge
+            </h2>
+            <p class="text-slate-600 text-base mt-2">
+                Why existing collection frameworks struggle with small FBOs and how UCO-Connect solves it.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- The Problem Card -->
+            <div class="bg-white rounded-2xl p-8 border border-red-200 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-red-100 rounded-bl-full -mr-8 -mt-8"></div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-900">Current Industry Bottleneck</h3>
+                        <p class="text-xs text-slate-500">Unviable economics &amp; leakage risks</p>
+                    </div>
+                </div>
+
+                <ul class="space-y-4 text-sm text-slate-600">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-xmark text-red-500 mt-1 font-bold"></i>
+                        <span><strong>Tiny Volumes (2&ndash;3L/day):</strong> Individual pickups are economically unviable; route and fuel costs exceed oil value.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-xmark text-red-500 mt-1 font-bold"></i>
+                        <span><strong>Manual Paper Records:</strong> No tamper-proof trail; quantity, location, and handover easily falsified.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-xmark text-red-500 mt-1 font-bold"></i>
+                        <span><strong>Food Chain Leakage:</strong> High-TPC carcinogenic oil sold to informal street vendors or poured into municipal drains.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-xmark text-red-500 mt-1 font-bold"></i>
+                        <span><strong>Fragmented Demand:</strong> Small food businesses have zero incentive or connection to authorized processors.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- The Solution Card -->
+            <div class="bg-white rounded-2xl p-8 border border-emerald-200 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-100 rounded-bl-full -mr-8 -mt-8"></div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-900">The UCO-Connect Solution</h3>
+                        <p class="text-xs text-slate-500">Hyperlocal clustering &amp; verified digital custody</p>
+                    </div>
+                </div>
+
+                <ul class="space-y-4 text-sm text-slate-600">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-emerald-600 mt-1 font-bold"></i>
+                        <span><strong>Micro-Collection Aggregation:</strong> Smart geo-clustering groups 5–10 tiny requests into one economical 125–150L run.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-emerald-600 mt-1 font-bold"></i>
+                        <span><strong>5-Step Verification Gate:</strong> QR container scan + W3C GPS + scale weight + photo evidence creates immutable audit logs.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-emerald-600 mt-1 font-bold"></i>
+                        <span><strong>Instant UPI Payments:</strong> Guaranteed ₹50/L transparent payout settles instantly on verified collection.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-emerald-600 mt-1 font-bold"></i>
+                        <span><strong>RUCO Compliance Certificates:</strong> Automated digital disposal certificates prove diversion from the human food chain.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Environmental & Regulatory Policy Alignment -->
+<section id="impact" class="py-20 bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div class="lg:col-span-6 space-y-6">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 px-3 py-1 rounded-full bg-emerald-950 border border-emerald-800">
+                    Regulatory &amp; Policy Alignment
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+                    Powering India's Biofuel Mandate &amp; Food Safety
+                </h2>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    UCO-Connect is purpose-built to extend the reach of the <strong class="text-white">FSSAI Repurpose Used Cooking Oil (RUCO)</strong> ecosystem at the grassroots, ensuring that high-TPC oil (>25%) is systematically diverted from frying pans into domestic biofuel feedstock.
+                </p>
+
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700">
+                        <h4 class="font-bold text-emerald-400 text-sm">FSSAI RUCO Initiative</h4>
+                        <p class="text-xs text-slate-400 mt-1">Mandatory safe disposal of UCO by commercial food business operators.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700">
+                        <h4 class="font-bold text-amber-400 text-sm">National Biofuels Policy</h4>
+                        <p class="text-xs text-slate-400 mt-1">MoPNG target of 5% biodiesel blending in diesel across India by 2030.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6">
+                <div class="bg-gradient-to-tr from-brand-900 to-slate-800 p-8 rounded-3xl border border-brand-700 shadow-2xl">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                        <span>Measurable Pilot Impact (50 Generators)</span>
+                    </h3>
+
+                    <div class="space-y-4 text-xs font-mono">
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>Daily UCO Aggregated</span>
+                                <span class="text-emerald-400 font-bold">125 &ndash; 150 Litres / day</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-emerald-400 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>Refinery Conversion Yield (Biodiesel)</span>
+                                <span class="text-amber-400 font-bold">~89.0% Efficiency</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-amber-400 h-2 rounded-full" style="width: 89%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>High-TPC Oil Diverted from Food Chain</span>
+                                <span class="text-emerald-300 font-bold">100% Traceable</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-emerald-300 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>API Cost &amp; Lock-in</span>
+                                <span class="text-emerald-400 font-bold">₹0.00 (100% Free Open Stack)</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-emerald-400 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-slate-700/80 flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Pitch Anchor</p>
+                            <p class="text-xs text-slate-200 font-medium italic mt-0.5">"We make the existing UCO ecosystem economically viable and operationally scalable at the grassroots."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-16 bg-emerald-600 text-brand-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl sm:text-4xl font-black tracking-tight">
+            Ready to Explore the Live Prototype?
+        </h2>
+        <p class="text-brand-950/80 font-medium text-base mt-2 max-w-2xl mx-auto">
+            Experience role-specific dashboards, interactive TSP routing, 5-step QR/GPS verification, and instant digital disposal certification.
+        </p>
+        <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+            <a href="{% url 'login' %}" class="px-8 py-4 rounded-xl bg-brand-950 text-white font-extrabold text-base shadow-xl hover:bg-black transition-all">
+                Access 1-Click Demo Portals
+            </a>
+            <a href="{% url 'register' %}" class="px-8 py-4 rounded-xl bg-white text-brand-950 font-extrabold text-base shadow-md hover:bg-slate-50 transition-all">
+                Register Food Business
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
